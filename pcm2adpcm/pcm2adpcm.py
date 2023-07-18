@@ -80,13 +80,17 @@ def encode_adpcm(current_data, last_estimate, step_index):
 
   return (code,estimate, adjusted_index)
 
-def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_freq):
+def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_freq, max_peak, min_avg):
 
   with open(pcm_file, "rb") as pf:
 
     pcm_bytes = pf.read()
     pcm_data = []
-    
+
+    pcm_peak = 0
+    pcm_total = 0.0
+    num_samples = 0
+
     resample_counter = 0
 
     if pcm_channels == 2:
@@ -97,6 +101,12 @@ def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_fre
           rch = int.from_bytes(pcm_bytes[i*4+2:i*4+4], 'big', signed=True)
           pcm_data.append((lch + rch) // 2)
           resample_counter -= pcm_freq
+          if abs(lch) > pcm_peak:
+            pcm_peak = abs(lch)
+          if abs(rch) > pcm_peak:
+            pcm_peak = abs(rch)
+          pcm_total += float(abs(lch) + abs(rch))
+          num_samples += 2
     else:
       for i in range(len(pcm_bytes) // 2):
         resample_counter += adpcm_freq
@@ -104,6 +114,19 @@ def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_fre
           mch = int.from_bytes(pcm_bytes[i*2+0:i*2+2], 'big', signed=True)
           pcm_data.append(mch)
           resample_counter -= pcm_freq
+          if abs(mch) > pcm_peak:
+            pcm_peak = abs(mch)
+          pcm_total += float(abs(mch))
+          num_samples += 1
+
+    avg_level = 100.0 * pcm_total / num_samples / 32767.0
+    peak_level = 100.0 * pcm_peak / 32767.0
+    print(f"Average Level ... {avg_level}%")
+    print(f"Peak Level    ... {peak_level}%")
+
+    if avg_level < min_avg or peak_level > max_peak:
+      printf("Level range error. Adjust volume settings.")
+      return 1
 
     last_estimate = 0
     step_index = 0
@@ -135,9 +158,12 @@ def main():
   parser.add_argument("pcm_channels", help="input PCM channels", type=int)
   parser.add_argument("adpcm_file", help="output ADPCM file")
   parser.add_argument("adpcm_freq", help="output ADPCM frequency", type=int)
+  parser.add_argument("-p", "--max_peak", help="max peak level", default=90.0)
+  parser.add_argument("-l", "--min_avg", help="min average level", default=7.0)
+
   args = parser.parse_args()
 
-  convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq)
+  convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq, args.max_peak, args.min_avg)
 
 
 if __name__ == "__main__":
