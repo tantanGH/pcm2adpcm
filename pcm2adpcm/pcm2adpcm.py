@@ -121,11 +121,11 @@ def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_fre
 
     avg_level = 100.0 * pcm_total / num_samples / 32767.0
     peak_level = 100.0 * pcm_peak / 32767.0
-    print(f"Average Level ... {avg_level}%")
-    print(f"Peak Level    ... {peak_level}%")
+    print(f"Average Level ... {avg_level:%.2f}%")
+    print(f"Peak Level    ... {peak_level:%.2f}%")
 
     if avg_level < min_avg or peak_level > max_peak:
-      printf("Level range error. Adjust volume settings.")
+      print("Level range error. Adjust volume settings.")
       return 1
 
     last_estimate = 0
@@ -159,7 +159,7 @@ def main():
   parser.add_argument("adpcm_file", help="output ADPCM file")
   parser.add_argument("adpcm_freq", help="output ADPCM frequency", type=int)
   parser.add_argument("-p", "--max_peak", help="max peak level", default=90.0)
-  parser.add_argument("-l", "--min_avg", help="min average level", default=7.0)
+  parser.add_argument("-l", "--min_avg", help="min average level", default=6.0)
 
   args = parser.parse_args()
 
