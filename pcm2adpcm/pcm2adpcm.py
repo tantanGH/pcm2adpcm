@@ -121,8 +121,8 @@ def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_fre
 
     avg_level = 100.0 * pcm_total / num_samples / 32767.0
     peak_level = 100.0 * pcm_peak / 32767.0
-    print(f"Average Level ... {avg_level:%.2f}%")
-    print(f"Peak Level    ... {peak_level:%.2f}%")
+    print(f"Average Level ... {avg_level:.2f}%")
+    print(f"Peak Level    ... {peak_level:.2f}%")
 
     if avg_level < min_avg or peak_level > max_peak:
       print("Level range error. Adjust volume settings.")
