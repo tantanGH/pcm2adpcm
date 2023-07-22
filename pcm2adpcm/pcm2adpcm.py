@@ -1,14 +1,8 @@
 #
 #  pcm2adpcm.py - 16bit raw PCM (big endian) to X68k ADPCM data converter
 #
-#  version 2023.06.21 by tantan
-#
-#   Prerequisites:
-#     - Python 3
-#
 
 import os
-import sys
 import argparse
 
 step_adjust = [ -1, -1, -1, -1, 2, 4, 6, 8, -1, -1, -1, -1, 2, 4, 6, 8 ]
