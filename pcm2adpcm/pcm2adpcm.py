@@ -163,8 +163,7 @@ def main():
 
   args = parser.parse_args()
 
-  convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq, args.max_peak, args.min_avg)
-
+  return convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq, args.max_peak, args.min_avg)
 
 if __name__ == "__main__":
   sys.exit(main())
