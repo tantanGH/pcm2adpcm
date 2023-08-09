@@ -74,7 +74,7 @@ def encode_adpcm(current_data, last_estimate, step_index):
 
   return (code,estimate, adjusted_index)
 
-def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_freq, max_peak, min_avg):
+def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_freq, max_peak, min_avg, fade_out):
 
   with open(pcm_file, "rb") as pf:
 
@@ -126,7 +126,12 @@ def convert_pcm_to_adpcm(pcm_file, pcm_freq, pcm_channels, adpcm_file, adpcm_fre
     step_index = 0
     adpcm_data = []
 
-    for i,x in enumerate( pcm_data ):
+    fade_out_start = len(pcm_data) - adpcm_freq if fade_out else -1
+
+    for i,x in enumerate(pcm_data):
+
+      if fade_out_start >= 0 and i >= fade_out_start:
+        x = int(x * float(adpcm_freq - (i - fade_out_start)) / float(adpcm_freq))
 
       # signed 16bit to 12bit, then encode to ADPCM
       xx = x // 16
@@ -154,10 +159,11 @@ def main():
   parser.add_argument("adpcm_freq", help="output ADPCM frequency", type=int)
   parser.add_argument("-p", "--max_peak", help="max peak level", default=90.0)
   parser.add_argument("-l", "--min_avg", help="min average level", default=6.0)
+  parser.add_argument("-f", "--fade_out", help="fade out", action='store_true')
 
   args = parser.parse_args()
 
-  return convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq, args.max_peak, args.min_avg)
+  return convert_pcm_to_adpcm( args.pcm_file, args.pcm_freq, args.pcm_channels, args.adpcm_file, args.adpcm_freq, args.max_peak, args.min_avg, args.fade_out)
 
 if __name__ == "__main__":
   main()
